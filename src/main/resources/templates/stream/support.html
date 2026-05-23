@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{stream/partials :: head('Service client PrimeStream')}"></head>
+<body class="stream-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="page-shell support-layout">
+    <section class="page-title">
+        <span class="kicker" data-i18n="support.kicker">Service client</span>
+        <h1 data-i18n="support.title">Aide PrimeStream</h1>
+        <p data-i18n="support.subtitle">Support streaming, abonnement, paiement, lecture video et compte utilisateur.</p>
+    </section>
+    <section class="support-grid">
+        <article class="support-card">
+            <h2 data-i18n="support.playback">Probleme de lecture</h2>
+            <p data-i18n="support.playbackText">Verifiez votre connexion, rechargez la page, puis essayez une video locale MP4.</p>
+        </article>
+        <article class="support-card">
+            <h2 data-i18n="support.account">Compte et connexion</h2>
+            <p data-i18n="support.accountText">Creation de compte, recuperation de mot de passe, email de confirmation et profils.</p>
+        </article>
+        <article class="support-card">
+            <h2 data-i18n="support.subscription">Abonnement</h2>
+            <p data-i18n="support.subscriptionText">Changement de plan, essai gratuit, paiement simule ou preparation Stripe/PayPal.</p>
+        </article>
+    </section>
+    <form class="support-form">
+        <h2 data-i18n="support.contact">Contacter le support</h2>
+        <input data-i18n-placeholder="support.email" placeholder="Votre email">
+        <select><option data-i18n="support.playbackOption">Lecture video</option><option data-i18n="support.paymentOption">Paiement</option><option data-i18n="support.accountOption">Compte</option><option data-i18n="support.catalogOption">Catalogue</option></select>
+        <textarea data-i18n-placeholder="support.problem" placeholder="Expliquez le probleme"></textarea>
+        <button class="btn-stream primary" type="button" data-i18n="support.send">Envoyer la demande</button>
+    </form>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

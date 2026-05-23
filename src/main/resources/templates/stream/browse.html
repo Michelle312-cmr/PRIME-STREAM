@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{stream/partials :: head('Catalogue PrimeStream')}"></head>
+<body class="stream-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="page-shell">
+    <section class="page-title">
+        <h1 data-i18n="browse.title">Films, series et documentaires</h1>
+        <p data-i18n="browse.subtitle">Recherche intelligente, filtres et recommandations facon plateforme premium.</p>
+    </section>
+    <form class="filter-bar" th:action="@{/browse}">
+        <input name="q" th:value="${q}" data-i18n-placeholder="browse.search" placeholder="Titre, acteur, realisateur...">
+        <select name="genre">
+            <option value="" data-i18n="browse.allGenres">Tous les genres</option>
+            <option th:each="g : ${genres}" th:value="${g}" th:text="${g}" th:selected="${g == genre}">Action</option>
+        </select>
+        <select name="type">
+            <option value="" data-i18n="browse.allFormats">Tous les formats</option>
+            <option value="Film" th:selected="${type == 'Film'}" data-i18n="nav.movies">Films</option>
+            <option value="Serie" th:selected="${type == 'Serie'}" data-i18n="nav.series">Series</option>
+            <option value="Documentaire" th:selected="${type == 'Documentaire'}" data-i18n="nav.docs">Documentaires</option>
+            <option value="Anime" th:selected="${type == 'Anime'}">Animes</option>
+        </select>
+        <input name="year" th:value="${year}" data-i18n-placeholder="browse.year" placeholder="Annee">
+        <button class="btn-stream primary" type="submit" data-i18n="browse.searchButton">Rechercher</button>
+    </form>
+    <section class="succhero-empty" th:if="${noResultQuery != null && !noResultQuery.isBlank()}">
+        <div>
+            <span class="kicker">SUCCHERO</span>
+            <h2 th:text="${'Le film ' + noResultQuery + ' n est pas encore disponible'}">Film indisponible</h2>
+            <p data-i18n="browse.notifyText">Activez une notification et SUCCHERO vous previendra par email quand le titre arrive dans PrimeStream.</p>
+        </div>
+        <form th:action="@{/succhero/notify}" method="post">
+            <input type="hidden" name="title" th:value="${noResultQuery}">
+            <input type="hidden" name="genre" th:value="${genre}">
+            <button class="btn-stream primary" type="submit" data-i18n="browse.notifyButton">Activer la notification</button>
+        </form>
+    </section>
+    <section class="catalog-grid">
+        <article class="catalog-card" th:each="media : ${items}" th:attr="data-genres=${#strings.listJoin(media.genres, ',')}">
+            <img th:src="${media.posterUrl}" th:alt="${media.title}">
+            <div>
+                <div class="meta-line"><span th:text="${media.type}">Film</span><span th:text="${media.releaseYear}">2026</span><span th:text="${media.rating}">4.7</span></div>
+                <h2 th:text="${media.title}">Titre</h2>
+                <p th:text="${media.description}">Description</p>
+                <div class="tag-row"><span th:each="g : ${media.genres}" th:text="${g}">Action</span></div>
+                <a class="btn-stream ghost" th:href="@{/watch/{id}(id=${media.id})}" data-i18n="common.watch">Voir</a>
+            </div>
+        </article>
+    </section>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

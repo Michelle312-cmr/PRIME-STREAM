@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header class="topbar" th:fragment="header">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <div class="container nav">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-mark">P</span>
+            <span>Prime 2.0</span>
+        </a>
+        <form class="search" th:action="@{/products}">
+            <input data-search name="q" placeholder="Rechercher produits, marques, categories..." th:value="${q}">
+            <button type="submit">Rechercher</button>
+            <div class="suggestions" data-suggestions></div>
+        </form>
+        <nav class="nav-actions">
+            <a class="btn secondary" th:href="@{/products}">Catalogue</a>
+            <a class="btn secondary" sec:authorize="isAuthenticated()" th:href="@{/cart}">Panier <span data-cart-count>0</span></a>
+            <a class="btn secondary" sec:authorize="hasAnyRole('SELLER','ADMIN')" th:href="@{/seller/dashboard}">Vendeur</a>
+            <a class="btn secondary" sec:authorize="hasRole('ADMIN')" th:href="@{/admin/home}">Admin</a>
+            <a class="btn gold" sec:authorize="!isAuthenticated()" th:href="@{/login}">Connexion</a>
+            <a class="btn gold" sec:authorize="isAuthenticated()" th:href="@{/user/home}">Profil</a>
+            <button class="btn secondary icon-btn" type="button" data-theme-toggle title="Theme">T</button>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

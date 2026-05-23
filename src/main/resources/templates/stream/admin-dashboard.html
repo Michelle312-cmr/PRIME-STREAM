@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{stream/partials :: head('Admin PrimeStream')}"></head>
+<body class="stream-body">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="page-shell admin-grid">
+    <section class="admin-panel">
+        <h1>Dashboard Admin</h1>
+        <p th:if="${param.demoMail}" class="success">Mail de demonstration envoye. Verifiez la boite de reception et les spams.</p>
+        <div class="stats-strip compact">
+            <div><strong th:text="${items.size()}">0</strong><span>Contenus</span></div>
+            <div><strong th:text="${featured.size()}">0</strong><span>Mis en avant</span></div>
+            <div><strong>Simule</strong><span>Paiements</span></div>
+        </div>
+        <form th:action="@{/admin/stream/demo-mail}" method="post" class="demo-mail-form">
+            <h2>Envoyer un mail de demo maintenant</h2>
+            <p>Envoie un email HTML style plateforme streaming avec affiche, description et bouton rouge.</p>
+            <div class="form-row">
+                <input name="email" type="email" th:value="${demoMailTo}" placeholder="votre-adresse@gmail.com" required>
+                <button class="btn-stream primary" type="submit">Envoyer le mail</button>
+            </div>
+        </form>
+        <table class="admin-table">
+            <thead><tr><th>Titre</th><th>Type</th><th>Note</th><th>Vues</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="media : ${items}">
+                <td th:text="${media.title}">Titre</td><td th:text="${media.type}">Film</td><td th:text="${media.rating}">4.8</td><td th:text="${media.views}">100</td>
+                <td><form th:action="@{/admin/stream/{id}/delete(id=${media.id})}" method="post"><button class="danger-link" type="submit">Supprimer</button></form></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    <form class="admin-panel media-form" th:action="@{/admin/stream}" th:object="${mediaForm}" method="post" enctype="multipart/form-data">
+        <h2>Ajouter un film ou une serie</h2>
+        <input th:field="*{title}" placeholder="Titre">
+        <select th:field="*{type}">
+            <option value="Film">Film</option>
+            <option value="Serie">Serie</option>
+            <option value="Documentaire">Documentaire</option>
+            <option value="Anime">Anime</option>
+        </select>
+        <textarea th:field="*{description}" placeholder="Description"></textarea>
+        <label>Affiche depuis votre ordinateur <input name="posterFile" type="file" accept="image/*"></label>
+        <label>Banniere depuis votre ordinateur <input name="bannerFile" type="file" accept="image/*"></label>
+        <label>Video depuis votre ordinateur <input name="videoFile" type="file" accept="video/mp4,video/webm,application/vnd.apple.mpegurl"></label>
+        <input th:field="*{posterUrl}" placeholder="Ou URL affiche">
+        <input th:field="*{bannerUrl}" placeholder="Ou URL banniere">
+        <input th:field="*{videoUrl}" placeholder="Ou URL video MP4/HLS">
+        <input th:field="*{genres}" placeholder="Genres separes par virgule">
+        <input th:field="*{languages}" placeholder="Langues">
+        <input th:field="*{castMembers}" placeholder="Acteurs">
+        <div class="form-row"><input th:field="*{releaseYear}" placeholder="Annee"><input th:field="*{durationMinutes}" placeholder="Duree"><input th:field="*{rating}" placeholder="Note"></div>
+        <label><input type="checkbox" th:field="*{featured}"> Mettre en avant</label>
+        <label><input type="checkbox" th:field="*{topTen}"> Top 10</label>
+        <label><input type="checkbox" th:field="*{premiumOnly}"> Premium seulement</label>
+        <button class="btn-stream primary" type="submit">Publier</button>
+    </form>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catalogue</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container section">
+    <div class="section-head">
+        <div>
+            <h1>Catalogue produits</h1>
+            <p class="muted">Recherche, tri, categories et disponibilite en temps reel.</p>
+        </div>
+    </div>
+    <form class="filters" th:action="@{/products}">
+        <label>Recherche<input class="input" name="q" th:value="${q}" placeholder="Nom du produit"></label>
+        <label>Categorie
+            <select name="category">
+                <option value="">Toutes</option>
+                <option th:selected="${category == 'High-Tech'}">High-Tech</option>
+                <option th:selected="${category == 'Maison'}">Maison</option>
+                <option th:selected="${category == 'Cuisine'}">Cuisine</option>
+                <option th:selected="${category == 'Mode'}">Mode</option>
+                <option th:selected="${category == 'Bureau'}">Bureau</option>
+            </select>
+        </label>
+        <label>Tri
+            <select name="sort">
+                <option value="popular" th:selected="${sort == 'popular'}">Popularite</option>
+                <option value="new" th:selected="${sort == 'new'}">Nouveautes</option>
+                <option value="priceAsc" th:selected="${sort == 'priceAsc'}">Prix croissant</option>
+                <option value="priceDesc" th:selected="${sort == 'priceDesc'}">Prix decroissant</option>
+            </select>
+        </label>
+        <button class="btn" type="submit">Filtrer</button>
+    </form>
+    <div class="grid">
+        <article class="product-card" th:each="product : ${products.content}">
+            <img class="product-img" th:src="${product.imageUrl}" th:alt="${product.name}">
+            <div class="product-body">
+                <div>
+                    <span class="badge" th:text="${product.category}">Categorie</span>
+                    <span class="badge prime" th:if="${product.primeEligible}">Prime</span>
+                </div>
+                <h3 th:text="${product.name}">Produit</h3>
+                <p class="muted" th:text="${product.description}">Description</p>
+                <span class="rating" th:text="${'★ ' + product.rating + ' | Stock ' + product.stock}">4.8</span>
+                <div><span class="price" th:text="${product.price + ' FCFA'}">99</span><span class="old" th:if="${product.oldPrice}" th:text="${product.oldPrice + ' FCFA'}">120</span></div>
+                <button class="btn gold" sec:authorize="isAuthenticated()" th:data-add-cart="${product.id}">Ajouter au panier</button>
+                <a class="btn secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+            </div>
+        </article>
+    </div>
+    <div class="hero-actions" th:if="${products.totalPages > 1}">
+        <a class="btn secondary" th:if="${products.hasPrevious()}" th:href="@{/products(q=${q},category=${category},sort=${sort},page=${products.number - 1})}">Precedent</a>
+        <a class="btn secondary" th:if="${products.hasNext()}" th:href="@{/products(q=${q},category=${category},sort=${sort},page=${products.number + 1})}">Suivant</a>
+    </div>
+</main>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

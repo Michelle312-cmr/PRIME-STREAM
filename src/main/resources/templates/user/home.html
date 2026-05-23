@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">Dashboard client</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container section">
+    <div class="section-head">
+        <div>
+            <h1 th:text="${'Bonjour, ' + (user.fullName ?: who)}">Bonjour</h1>
+            <p class="muted">Commandes, wishlist, profil, abonnement Prime et notifications.</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="btn secondary" type="submit">Deconnexion</button>
+        </form>
+    </div>
+    <div th:if="${success}" class="panel" th:text="${success}"></div>
+    <section class="stats">
+        <div class="stat"><span class="muted">Commandes</span><strong th:text="${orders.size()}">0</strong></div>
+        <div class="stat"><span class="muted">Wishlist</span><strong th:text="${wishlist.size()}">0</strong></div>
+        <div class="stat"><span class="muted">Prime</span><strong th:text="${user.primeMember ? 'Actif' : 'Inactif'}">Actif</strong></div>
+    </section>
+    <section class="dashboard section">
+        <div class="panel">
+            <h2>Profil</h2>
+            <form th:action="@{/user/profile}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <label>Nom complet<input class="input" name="fullName" th:value="${user.fullName}"></label>
+                <label>Telephone<input class="input" name="phone" th:value="${user.phone}"></label>
+                <label>Photo de profil URL<input class="input" name="avatarUrl" th:value="${user.avatarUrl}" placeholder="https://..."></label>
+                <button class="btn" type="submit">Mettre a jour</button>
+            </form>
+        </div>
+        <div class="panel">
+            <h2>Prime</h2>
+            <p class="muted">Livraison gratuite, offres flash et contenu exclusif simule.</p>
+            <form th:if="${!user.primeMember}" th:action="@{/prime/subscribe}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <select name="plan"><option value="mensuel">Mensuel</option><option value="annuel">Annuel</option></select>
+                <button class="btn gold" type="submit">Demarrer 7 jours gratuits</button>
+            </form>
+            <form th:if="${user.primeMember}" th:action="@{/prime/cancel}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn danger" type="submit">Annuler Prime</button>
+            </form>
+        </div>
+        <div class="panel">
+            <h2>Historique commandes</h2>
+            <table>
+                <tr><th>#</th><th>Statut</th><th>Paiement</th><th>Transaction</th><th>Total</th><th>Facture</th></tr>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${order.status}">PROCESSING</td>
+                    <td><span class="badge prime" th:text="${order.paymentStatus}">PAID</span></td>
+                    <td th:text="${order.transactionId ?: '-'}">TX</td>
+                    <td th:text="${order.total + ' FCFA'}">0</td>
+                    <td><a class="btn secondary" th:href="@{/orders/{id}/invoice(id=${order.id})}">Voir</a></td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel">
+            <h2>Wishlist</h2>
+            <div th:each="item : ${wishlist}" style="display:grid;grid-template-columns:64px 1fr;gap:10px;margin:10px 0">
+                <img th:src="${item.product.imageUrl}" th:alt="${item.product.name}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">
+                <a th:href="@{/products/{id}(id=${item.product.id})}" th:text="${item.product.name}">Produit</a>
+            </div>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

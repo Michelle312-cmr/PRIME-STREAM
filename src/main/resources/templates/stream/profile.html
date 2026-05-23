@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{stream/partials :: head('Profil PrimeStream')}"></head>
+<body class="stream-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="page-shell">
+    <section class="profile-hero">
+        <img th:src="${currentProfile.avatarUrl}" alt="Profil">
+        <div>
+            <span class="kicker" th:text="${user.primePlan == null ? 'Plan Gratuit' : 'Plan ' + user.primePlan}">Plan</span>
+            <h1 th:text="${user.fullName}">Utilisateur</h1>
+            <p th:text="${user.email}">email</p>
+        </div>
+        <a class="btn-stream primary" th:href="@{/subscription}" data-i18n="profile.manageSubscription">Gerer l'abonnement</a>
+    </section>
+
+    <section class="stats-strip">
+        <div><strong th:text="${profiles.size()}">1</strong><span data-i18n="profile.profiles">Profils</span></div>
+        <div><strong th:text="${history.size()}">0</strong><span data-i18n="profile.recentlyWatched">Vus recemment</span></div>
+        <div><strong th:text="${watchlist.size()}">0</strong><span data-i18n="profile.myList">Dans ma liste</span></div>
+    </section>
+
+    <section class="profile-details">
+        <article>
+            <h2 data-i18n="profile.accountInfo">Informations du compte</h2>
+            <p><strong data-i18n="profile.username">Nom utilisateur</strong><span th:text="${user.username}">user</span></p>
+            <p><strong>Email</strong><span th:text="${user.email}">email</span></p>
+            <p><strong data-i18n="profile.phone">Telephone</strong><span th:text="${user.phone == null ? 'Non renseigne' : user.phone}">phone</span></p>
+            <p><strong data-i18n="profile.roles">Roles</strong><span th:text="${user.roles}">USER</span></p>
+        </article>
+        <article>
+            <h2 data-i18n="profile.playbackPrefs">Preferences de lecture</h2>
+            <p><strong data-i18n="profile.language">Langue</strong><span th:text="${currentProfile.preferredLanguage}">Francais</span></p>
+            <p><strong data-i18n="profile.quality">Qualite</strong><span th:text="${currentProfile.preferredQuality}">Auto</span></p>
+            <p><strong data-i18n="profile.maturity">Niveau age</strong><span th:text="${currentProfile.maturityLevel}">18+</span></p>
+            <p><strong data-i18n="profile.mode">Mode</strong><span th:text="${currentProfile.moodMode}">classic</span></p>
+            <p><strong data-i18n="profile.favoriteGenre">Genre favori</strong><span th:text="${currentProfile.preferredGenre == null || currentProfile.preferredGenre.isBlank() ? 'Automatique' : currentProfile.preferredGenre}">Genre</span></p>
+            <p><strong data-i18n="profile.downloads">Telechargements</strong><span th:text="${user.primeMember ? 'Disponibles selon plan' : 'Premium requis'}">Premium</span></p>
+        </article>
+        <article>
+            <h2 data-i18n="profile.notifications">Notifications</h2>
+            <p><strong>Email</strong><span>Confirmation, recommandations, abonnement</span></p>
+            <p><strong data-i18n="profile.realtime">Temps reel</strong><span data-i18n="profile.realtimeText">Nouveaux episodes et rappels</span></p>
+            <p><strong data-i18n="profile.support">Support</strong><span><a th:href="@{/support}" data-i18n="profile.contactSupport">Contacter le service client</a></span></p>
+        </article>
+    </section>
+
+    <section class="preferences-panel">
+        <div>
+            <span class="kicker" data-i18n="profile.personalization">Personnalisation</span>
+            <h2 data-i18n="profile.smartTheme">Theme intelligent PrimeStream</h2>
+            <p data-i18n="profile.smartThemeText">Le mode choisi change l'ambiance visuelle et favorise les films du genre correspondant sur l'accueil.</p>
+        </div>
+        <form class="preferences-form" th:action="@{/profile/preferences}" method="post">
+            <select name="moodMode">
+                <option value="classic" th:selected="${currentProfile.moodMode == 'classic'}">Classique</option>
+                <option value="romance" th:selected="${currentProfile.moodMode == 'romance'}">Romance</option>
+                <option value="action" th:selected="${currentProfile.moodMode == 'action'}">Action</option>
+                <option value="family" th:selected="${currentProfile.moodMode == 'family'}">Famille</option>
+                <option value="science" th:selected="${currentProfile.moodMode == 'science'}">Science-fiction</option>
+                <option value="afrique" th:selected="${currentProfile.moodMode == 'afrique'}">Afrique</option>
+            </select>
+            <select name="preferredGenre">
+                <option value="">Genre automatique</option>
+                <option th:each="g : ${genres}" th:value="${g}" th:text="${g}" th:selected="${g == currentProfile.preferredGenre}">Genre</option>
+            </select>
+            <select name="preferredLanguage">
+                <option value="Francais" th:selected="${currentProfile.preferredLanguage == 'Francais'}">Francais</option>
+                <option value="Anglais" th:selected="${currentProfile.preferredLanguage == 'Anglais'}">Anglais</option>
+                <option value="Espagnol" th:selected="${currentProfile.preferredLanguage == 'Espagnol'}">Espagnol</option>
+            </select>
+            <select name="preferredQuality">
+                <option value="Auto" th:selected="${currentProfile.preferredQuality == 'Auto'}">Auto</option>
+                <option value="HD" th:selected="${currentProfile.preferredQuality == 'HD'}">HD</option>
+                <option value="4K HDR" th:selected="${currentProfile.preferredQuality == '4K HDR'}">4K HDR</option>
+            </select>
+            <select name="maturityLevel">
+                <option value="7+" th:selected="${currentProfile.maturityLevel == '7+'}">7+</option>
+                <option value="13+" th:selected="${currentProfile.maturityLevel == '13+'}">13+</option>
+                <option value="16+" th:selected="${currentProfile.maturityLevel == '16+'}">16+</option>
+                <option value="18+" th:selected="${currentProfile.maturityLevel == '18+'}">18+</option>
+            </select>
+            <button class="btn-stream primary" type="submit" data-i18n="profile.save">Enregistrer</button>
+        </form>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="profile.succheroNotifications">Notifications SUCCHERO</h2></div>
+        <div class="history-grid">
+            <article class="history-card" th:each="request : ${availabilityRequests}">
+                <div class="succhero-badge">S</div>
+                <div>
+                    <h3 th:text="${request.searchedTitle}">Titre recherche</h3>
+
+                    <p th:text="${request.notified and request.matchedMedia != null ? 'Disponible: ' + request.matchedMedia.title : 'En attente dans le catalogue'}">Statut</p>
+                    <a th:if="${request.notified and request.matchedMedia != null}" th:href="@{/watch/{id}(id=${request.matchedMedia.id})}">Regarder</a>
+                    
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="profile.continueWatching">Continuer a regarder</h2></div>
+        <div class="history-grid">
+            <article class="history-card" th:each="item : ${history}">
+                <img th:src="${item.media.posterUrl}" th:alt="${item.media.title}">
+                <div>
+                    <h3 th:text="${item.media.title}">Titre</h3>
+                    <div class="progress"><span th:style="'width:' + ${item.progressPercent} + '%'"></span></div>
+                    <a th:href="@{/watch/{id}(id=${item.media.id})}" data-i18n="profile.resume">Reprendre</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="profile.listTitle">Ma liste</h2></div>
+        <div class="rail-track">
+            <article class="media-card" th:each="item : ${watchlist}">
+                <a th:href="@{/watch/{id}(id=${item.media.id})}"><img th:src="${item.media.posterUrl}" th:alt="${item.media.title}"></a>
+                <div class="card-overlay"><strong th:text="${item.media.title}">Titre</strong><span th:text="${item.media.type}">Film</span></div>
+            </article>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

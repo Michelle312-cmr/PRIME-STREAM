@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panier</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container section">
+    <div class="section-head"><div><h1>Panier dynamique</h1><p class="muted">Mise a jour AJAX, coupon et calcul automatique.</p></div></div>
+    <div class="dashboard">
+        <section class="panel">
+            <p class="muted" th:if="${cart.lines().isEmpty()}">Votre panier est vide.</p>
+            <div class="cart-line" th:each="line : ${cart.lines()}">
+                <img th:src="${line.product.imageUrl}" th:alt="${line.product.name}">
+                <div>
+                    <strong th:text="${line.product.name}">Produit</strong>
+                    <div class="muted" th:text="${line.productPriceFormatted() + ' FCFA'}">Prix</div>
+                    <input class="input" style="max-width:120px;margin-top:8px" type="number" min="0" th:value="${line.quantity}" th:data-cart-qty="${line.product.id}">
+                </div>
+                <strong th:text="${line.lineTotalFormatted() + ' FCFA'}">Total</strong>
+            </div>
+        </section>
+        <aside class="panel summary">
+            <h2>Recapitulatif</h2>
+            <form data-coupon-form>
+                <label>Coupon<input class="input" name="coupon" placeholder="PRIME20" th:value="${cart.coupon()}"></label>
+                <button class="btn secondary" type="submit">Appliquer</button>
+            </form>
+            <div class="summary-row"><span>Sous-total</span><strong th:text="${cart.subtotalFormatted() + ' FCFA'}">0</strong></div>
+            <div class="summary-row"><span>Reduction</span><strong th:text="${cart.discountFormatted() + ' FCFA'}">0</strong></div>
+            <div class="summary-row"><span>Taxes</span><strong th:text="${cart.taxFormatted() + ' FCFA'}">0</strong></div>
+            <div class="summary-row"><span>Livraison</span><strong th:text="${cart.shippingFormatted() + ' FCFA'}">0</strong></div>
+            <div class="summary-row total"><span>Total</span><strong th:text="${cart.totalFormatted() + ' FCFA'}">0</strong></div>
+            <a class="btn gold" th:href="@{/checkout}" th:if="${!cart.lines().isEmpty()}">Commander</a>
+        </aside>
+    </div>
+</main>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

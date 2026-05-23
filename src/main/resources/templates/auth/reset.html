@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" th:replace="~{auth/layout :: page(~{::section})}">
+<section>
+    <h2 class="form-title">Nouveau mot de passe</h2>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+
+    <form th:action="@{/reset/{token}(token=${token})}" method="post" th:if="${token != null and success == null}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label for="newPassword">Nouveau mot de passe</label>
+        <input id="newPassword" name="newPassword" type="password" placeholder="Au moins 8 caracteres" required />
+
+        <button class="btn" type="submit">Changer le mot de passe</button>
+
+        <div class="links">
+            <a th:href="@{/login}">Retour connexion</a>
+        </div>
+    </form>
+</section>
+</html>

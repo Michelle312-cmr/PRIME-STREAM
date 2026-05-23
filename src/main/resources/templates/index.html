@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Amazon Prime 2.0</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<section class="hero">
+    <div class="container">
+        <span class="badge prime">Livraison gratuite, offres flash, contenu exclusif</span>
+        <h1>Amazon Prime 2.0</h1>
+        <p>Une marketplace moderne avec recherche intelligente, panier dynamique, espace vendeur, dashboard admin et notifications en temps reel.</p>
+        <div class="hero-actions">
+            <a class="btn gold" th:href="@{/products}">Explorer le catalogue</a>
+            <a class="btn secondary" sec:authorize="!isAuthenticated()" th:href="@{/register}">Creer un compte</a>
+            <a class="btn secondary" sec:authorize="isAuthenticated()" th:href="@{/user/home}">Mon dashboard</a>
+        </div>
+    </div>
+</section>
+
+<main>
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Offres flash Prime</h2>
+                    <p class="muted">Promotions prioritaires pour les membres Prime.</p>
+                </div>
+                <a class="btn secondary" th:href="@{/products(sort='priceAsc')}">Voir tout</a>
+            </div>
+            <div class="grid">
+                <article class="product-card" th:each="product : ${flashDeals}">
+                    <img class="product-img" th:src="${product.imageUrl}" th:alt="${product.name}">
+                    <div class="product-body">
+                        <span class="badge prime" th:text="${product.badge}">Prime</span>
+                        <h3 th:text="${product.name}">Produit</h3>
+                        <div><span class="price" th:text="${product.price + ' FCFA'}">99</span><span class="old" th:text="${product.oldPrice + ' FCFA'}">120</span></div>
+                        <span class="rating" th:text="${'★ ' + product.rating + ' (' + product.reviewCount + ')'}">4.8</span>
+                        <a class="btn" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Meilleures ventes</h2>
+                    <p class="muted">Recommandations basees sur les ventes et la categorie.</p>
+                </div>
+            </div>
+            <div class="grid">
+                <article class="product-card" th:each="product : ${featured}">
+                    <img class="product-img" th:src="${product.imageUrl}" th:alt="${product.name}">
+                    <div class="product-body">
+                        <span class="badge" th:text="${product.category}">Categorie</span>
+                        <h3 th:text="${product.name}">Produit</h3>
+                        <p class="muted" th:text="${product.description}">Description</p>
+                        <div class="price" th:text="${product.price + ' FCFA'}">99</div>
+                        <button class="btn gold" sec:authorize="isAuthenticated()" th:data-add-cart="${product.id}">Ajouter au panier</button>
+                        <a class="btn secondary" th:href="@{/products/{id}(id=${product.id})}">Voir</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

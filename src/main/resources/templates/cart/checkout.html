@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container section">
+    <h1>Commande multi-etapes</h1>
+    <div th:if="${error}" class="panel" style="border-color:var(--danger);color:var(--danger)" th:text="${error}"></div>
+    <form class="dashboard" th:action="@{/checkout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <section class="panel">
+            <span class="badge prime">Etape 1</span>
+            <h2>Adresse de livraison</h2>
+            <label>Adresse complete<textarea name="address" rows="5" required placeholder="Ville, quartier, rue, contact"></textarea></label>
+            <span class="badge prime">Etape 2</span>
+            <h2>Paiement simule</h2>
+            <label>Methode
+                <select name="paymentMethod" data-payment-method>
+                    <option value="Carte bancaire sandbox">Carte bancaire sandbox</option>
+                    <option value="PayPal sandbox">PayPal sandbox</option>
+                    <option value="Mobile Money sandbox">Mobile Money sandbox</option>
+                    <option value="Paiement a la livraison">Paiement a la livraison</option>
+                </select>
+            </label>
+
+            <div data-payment-panel="Carte bancaire sandbox">
+                <p class="muted">Carte acceptee : <strong>4242 4242 4242 4242</strong>. Carte refusee : <strong>4000 0000 0000 0002</strong>.</p>
+                <label>Nom du titulaire<input class="input" name="cardholderName" placeholder="Client Demo"></label>
+                <label>Numero de carte<input class="input" name="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242"></label>
+                <div class="filters" style="grid-template-columns:1fr 1fr 1fr;margin:10px 0;padding:0;border:0;box-shadow:none">
+                    <label>Mois<input class="input" name="expiryMonth" inputmode="numeric" placeholder="12"></label>
+                    <label>Annee<input class="input" name="expiryYear" inputmode="numeric" placeholder="2030"></label>
+                    <label>CVV<input class="input" name="cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123"></label>
+                </div>
+            </div>
+
+            <div data-payment-panel="PayPal sandbox" hidden>
+                <p class="muted">Utilise un email normal pour accepter. Un email contenant <strong>fail</strong> simule un refus.</p>
+                <label>Email PayPal<input class="input" name="paypalEmail" type="email" placeholder="client@example.com"></label>
+            </div>
+
+            <div data-payment-panel="Mobile Money sandbox" hidden>
+                <p class="muted">Un numero finissant par <strong>0000</strong> simule un solde insuffisant.</p>
+                <label>Numero Mobile Money<input class="input" name="mobileMoneyPhone" inputmode="tel" placeholder="699123456"></label>
+            </div>
+
+            <div data-payment-panel="Paiement a la livraison" hidden>
+                <p class="muted">La commande est confirmee et le paiement est marque comme accepte a la livraison.</p>
+            </div>
+
+            <button class="btn gold" type="submit">Confirmer la commande</button>
+        </section>
+        <aside class="panel summary">
+            <span class="badge prime">Etape 3</span>
+            <h2>Recapitulatif</h2>
+            <div th:each="line : ${cart.lines()}" class="summary-row">
+                <span th:text="${line.quantity + ' x ' + line.product.name}">Produit</span>
+                <strong th:text="${line.lineTotal + ' FCFA'}">0</strong>
+            </div>
+            <div class="summary-row total"><span>Total</span><strong th:text="${cart.total() + ' FCFA'}">0</strong></div>
+        </aside>
+    </form>
+</main>
+<script>
+    const method = document.querySelector("[data-payment-method]");
+    const panels = document.querySelectorAll("[data-payment-panel]");
+    function syncPaymentPanels() {
+        panels.forEach((panel) => {
+            panel.hidden = panel.dataset.paymentPanel !== method.value;
+        });
+    }
+    method.addEventListener("change", syncPaymentPanels);
+    syncPaymentPanels();
+</script>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

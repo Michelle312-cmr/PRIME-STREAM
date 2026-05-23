@@ -1,0 +1,389 @@
+openapi: 3.0.3
+info:
+  title: PrimeStream API
+  version: 1.0.0
+  description: API REST JWT pour tester PrimeStream et SUCCHERO avec Postman.
+servers:
+  - url: http://localhost:8091
+    description: Serveur local
+  - url: http://ADRESSE-IP-DU-SERVEUR:8091
+    description: Acces depuis un autre PC du meme reseau
+tags:
+  - name: Auth
+  - name: Media
+  - name: Watchlist
+  - name: Profile
+  - name: SUCCHERO
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Obtenir un token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: user
+              password: User@123
+      responses:
+        '200':
+          description: Token JWT cree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Identifiants invalides
+  /api/rest/me:
+    get:
+      tags: [Profile]
+      summary: Utilisateur connecte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profil utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/rest/media:
+    get:
+      tags: [Media]
+      summary: Rechercher des films et series
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: genre
+          schema: { type: string }
+        - in: query
+          name: type
+          schema: { type: string, example: Film }
+        - in: query
+          name: year
+          schema: { type: integer, example: 0 }
+      responses:
+        '200':
+          description: Catalogue filtre
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Media'
+  /api/rest/media/{id}:
+    get:
+      tags: [Media]
+      summary: Detail d'un film ou d'une serie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Detail media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+  /api/rest/watchlist:
+    get:
+      tags: [Watchlist]
+      summary: Voir la liste A regarder plus tard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Watchlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchlistItem'
+  /api/rest/watchlist/{id}:
+    post:
+      tags: [Watchlist]
+      summary: Ajouter ou retirer un media de la watchlist
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Etat apres bascule
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mediaId: { type: integer, format: int64 }
+                  added: { type: boolean }
+  /api/rest/profile/preferences:
+    post:
+      tags: [Profile]
+      summary: Changer le theme intelligent et les preferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceRequest'
+            example:
+              moodMode: romance
+              preferredGenre: Romance
+              preferredLanguage: Francais
+              preferredQuality: Auto
+              maturityLevel: 13+
+      responses:
+        '200':
+          description: Profil mis a jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/rest/subscription:
+    post:
+      tags: [Profile]
+      summary: Choisir un abonnement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequest'
+            example:
+              plan: Premium
+      responses:
+        '200':
+          description: Abonnement mis a jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/rest/progress:
+    post:
+      tags: [Media]
+      summary: Sauvegarder la progression de lecture
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressRequest'
+            example:
+              mediaId: 1
+              seconds: 420
+              percent: 35
+      responses:
+        '200':
+          description: Progression sauvegardee
+  /api/rest/succhero/chat:
+    post:
+      tags: [SUCCHERO]
+      summary: Discuter avec SUCCHERO
+      description: SUCCHERO repond uniquement aux questions qui concernent PrimeStream.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            example:
+              message: Comment acceder a PrimeStream depuis un autre PC ?
+      responses:
+        '200':
+          description: Reponse de SUCCHERO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reply: { type: string }
+  /api/rest/succhero/messages:
+    get:
+      tags: [SUCCHERO]
+      summary: Historique de conversation SUCCHERO
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Messages recents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuccheroMessage'
+  /api/rest/succhero/notify:
+    post:
+      tags: [SUCCHERO]
+      summary: Activer une notification quand un film sera disponible
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+            example:
+              searchedTitle: The Wicked
+              preferredGenre: Fantastique
+      responses:
+        '200':
+          description: Demande creee ou deja existante
+  /api/rest/succhero/requests:
+    get:
+      tags: [SUCCHERO]
+      summary: Voir les demandes de disponibilite de l'utilisateur
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Demandes recentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailabilityResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+        tokenType: { type: string, example: Bearer }
+        username: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+        expiresInMinutes: { type: integer }
+    User:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        username: { type: string }
+        email: { type: string }
+        fullName: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+        primeMember: { type: boolean }
+        primePlan: { type: string }
+        primeSubscriptionEndsAt: { type: string, format: date-time }
+        moodMode: { type: string }
+        preferredGenre: { type: string }
+    Media:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        type: { type: string }
+        description: { type: string }
+        releaseYear: { type: integer }
+        durationMinutes: { type: integer }
+        ageRating: { type: string }
+        director: { type: string }
+        rating: { type: number }
+        views: { type: integer }
+        premiumOnly: { type: boolean }
+        featured: { type: boolean }
+        topTen: { type: boolean }
+        posterUrl: { type: string }
+        bannerUrl: { type: string }
+        videoUrl: { type: string }
+        genres:
+          type: array
+          items: { type: string }
+        languages:
+          type: array
+          items: { type: string }
+        castMembers:
+          type: array
+          items: { type: string }
+    WatchlistItem:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        addedAt: { type: string, format: date-time }
+        media:
+          $ref: '#/components/schemas/Media'
+    PreferenceRequest:
+      type: object
+      properties:
+        moodMode: { type: string, enum: [classic, romance, action, family, science, afrique] }
+        preferredGenre: { type: string }
+        preferredLanguage: { type: string }
+        preferredQuality: { type: string }
+        maturityLevel: { type: string }
+    SubscriptionRequest:
+      type: object
+      properties:
+        plan: { type: string, enum: [Gratuit, Standard, Premium] }
+    ProgressRequest:
+      type: object
+      properties:
+        mediaId: { type: integer, format: int64 }
+        seconds: { type: integer }
+        percent: { type: integer, minimum: 0, maximum: 100 }
+    ChatRequest:
+      type: object
+      properties:
+        message: { type: string }
+    AvailabilityRequest:
+      type: object
+      properties:
+        searchedTitle: { type: string }
+        preferredGenre: { type: string }
+    AvailabilityResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        searchedTitle: { type: string }
+        preferredGenre: { type: string }
+        notified: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        notifiedAt: { type: string, format: date-time }
+        matchedMedia:
+          $ref: '#/components/schemas/Media'
+    SuccheroMessage:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        role: { type: string, enum: [USER, ASSISTANT] }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }

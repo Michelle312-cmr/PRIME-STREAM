@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{stream/partials :: head('Abonnement PrimeStream')}"></head>
+<body class="stream-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="page-shell">
+    <section class="page-title center">
+        <h1 data-i18n="subscription.title">Choisissez votre experience PrimeStream</h1>
+        <p data-i18n="subscription.subtitle">Paiement en temps reel prepare cote interface. En demo, l'activation est immediate; avec des cles Stripe/PayPal, le backend peut etre branche ensuite.</p>
+    </section>
+
+    <div th:if="${success}" style="background: #edfdf4; border: 1px solid #bbf7d0; color: #146c45; padding: 12px 16px; border-radius: 8px; margin: 16px 0; font-weight: 700;" th:text="${success}">
+        Succès!
+    </div>
+    <div th:if="${error}" style="background: #fff1f2; border: 1px solid #fecdd3; color: #c43d4b; padding: 12px 16px; border-radius: 8px; margin: 16px 0; font-weight: 700;" th:text="${error}">
+        Erreur!
+    </div>
+
+    <div sec:authorize="isAuthenticated()" th:if="${currentUser != null && currentUser.primeMember}" style="background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; padding: 16px; border-radius: 8px; margin: 16px 0;">
+        <strong>Statut actuel: </strong>
+        <span th:text="${currentUser.primePlan}">Plan</span> actif jusqu'au
+        <span th:text="${currentUser.primeSubscriptionEndsAt != null ? #temporals.format(currentUser.primeSubscriptionEndsAt, 'dd/MM/yyyy HH:mm') : '-'}">Date</span>
+    </div>
+
+    <section class="plan-grid">
+        <form class="plan-card" th:action="@{/subscription}" method="post">
+            <input type="hidden" name="plan" value="Gratuit">
+            <h2 data-i18n="subscription.free">Gratuit</h2><strong>0 EUR</strong><p data-i18n="subscription.freeText">480p, 1 ecran, publicites.</p>
+            <button class="btn-stream ghost" type="submit" data-i18n="subscription.activate">Activer</button>
+        </form>
+        <form class="plan-card featured-plan" th:action="@{/subscription}" method="post">
+            <input type="hidden" name="plan" value="Standard">
+            <h2>Standard</h2><strong>9,99 EUR/mois</strong><p data-i18n="subscription.standardText">Full HD, 2 ecrans, sans publicites.</p>
+            <button class="btn-stream primary" type="button" data-plan-btn data-plan="Standard" data-i18n="subscription.trial">Essayer 7 jours</button>
+        </form>
+        <form class="plan-card" th:action="@{/subscription}" method="post">
+            <input type="hidden" name="plan" value="Premium">
+            <h2>Premium</h2><strong>14,99 EUR/mois</strong><p data-i18n="subscription.premiumText">4K HDR, 4 ecrans, contenus exclusifs.</p>
+            <button class="btn-stream primary" type="button" data-plan-btn data-plan="Premium" data-i18n="subscription.upgrade">Passer Premium</button>
+        </form>
+    </section>
+    <section class="payment-panel">
+        <div>
+            <h2 data-i18n="subscription.securePayment">Paiement securise</h2>
+            <p data-i18n="subscription.paymentText">Carte bancaire, PayPal Sandbox ou Mobile Money. Les informations ci-dessous simulent une experience proche d'Amazon Prime Video.</p>
+            <p class="payment-hint">Carte acceptee: <strong>4242 4242 4242 4242</strong>. Carte refusee: <strong>4000 0000 0000 0002</strong>.</p>
+        </div>
+        <form class="payment-form" data-subscription-payment>
+            <input type="hidden" data-selected-plan value="Standard">
+            <label>Plan choisi
+                <select data-plan-select>
+                    <option value="Standard">Standard - 9,99 EUR/mois</option>
+                    <option value="Premium">Premium - 14,99 EUR/mois</option>
+                </select>
+            </label>
+            <input data-card-name data-i18n-placeholder="subscription.cardName" placeholder="Nom sur la carte" autocomplete="cc-name">
+            <input data-card-number placeholder="4242 4242 4242 4242" inputmode="numeric" autocomplete="cc-number">
+            <div class="form-row"><input data-card-exp placeholder="MM/AA" inputmode="numeric" autocomplete="cc-exp"><input data-card-cvv placeholder="CVV" inputmode="numeric" autocomplete="cc-csc"><input data-i18n-placeholder="subscription.zip" placeholder="Code postal"></div>
+            <button class="btn-stream primary" type="button" data-pay-subscription data-i18n="subscription.verify">Verifier le paiement</button>
+            <p class="payment-result" data-payment-result></p>
+        </form>
+    </section>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

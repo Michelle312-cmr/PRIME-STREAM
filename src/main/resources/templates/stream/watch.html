@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{stream/partials :: head(${media.title})}"></head>
+<body class="stream-body watch-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+<main class="watch-shell">
+    <section class="player-stage">
+        <video class="prime-player" controls autoplay playsinline th:data-media-id="${media.id}" th:data-start="${progress != null ? progress.progressSeconds : 0}" th:poster="${media.bannerUrl}">
+            <source th:src="${media.videoUrl}" th:attr="type=${#strings.endsWith(#strings.toLowerCase(media.videoUrl), '.avi') ? 'video/x-msvideo' : 'video/mp4'}">
+            <track kind="subtitles" srclang="fr" label="Francais" th:if="${media.subtitleUrl != null}" th:src="${media.subtitleUrl}">
+        </video>
+        <div class="watch-info">
+            <div>
+                <span class="kicker" th:text="${media.premiumOnly ? 'Premium - 4K HDR' : 'Inclus avec PrimeStream'}">Premium</span>
+                <h1 th:text="${media.title}">Titre</h1>
+                <div class="meta-line">
+                    <span th:text="${media.releaseYear}">2026</span>
+                    <span th:text="${media.ageRating}">13+</span>
+                    <span th:text="${media.durationMinutes + ' min'}">110 min</span>
+                    <span th:text="${media.rating}">4.8</span>
+                </div>
+            </div>
+            <div class="watch-actions">
+                <a class="btn-stream primary" th:href="${media.videoUrl}" download data-i18n="common.download">Telecharger</a>
+                <button class="btn-stream ghost" th:data-watchlist="${media.id}" th:text="${inWatchlist ? 'Retirer de ma liste' : 'Ajouter a ma liste'}">Liste</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="detail-layout">
+        <article>
+            <p class="synopsis" th:text="${media.description}">Description</p>
+            <div class="detail-list">
+                <p><strong data-i18n="watch.genres">Genres</strong> <span th:text="${media.genres}">Action</span></p>
+                <p><strong data-i18n="watch.languages">Langues</strong> <span th:text="${media.languages}">Francais</span></p>
+                <p><strong data-i18n="watch.cast">Avec</strong>
+                    <span class="actor-links">
+                        <a th:each="actor : ${media.castMembers}" th:href="${actorLinks.get(actor)}" target="_blank" rel="noopener" th:text="${actor}" title="TikTok">Acteur</a>
+                    </span>
+                </p>
+                <p><strong data-i18n="watch.director">Realisation</strong> <span th:text="${media.director}">Studio</span></p>
+            </div>
+            <form class="review-box" th:action="@{/review/{id}(id=${media.id})}" method="post">
+                <h2 data-i18n="watch.review">Votre avis</h2>
+                <select name="score"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+                <input name="comment" maxlength="700" data-i18n-placeholder="watch.comment" placeholder="Votre commentaire">
+                <button class="btn-stream primary" type="submit" data-i18n="watch.publish">Publier</button>
+            </form>
+        </article>
+        <aside>
+            <h2 data-i18n="watch.recentReviews">Avis recents</h2>
+            <div class="review-item" th:each="review : ${reviews}">
+                <strong th:text="${review.score + ' - ' + review.user.username}">Avis</strong>
+                <p th:text="${review.comment}">Commentaire</p>
+            </div>
+        </aside>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="watch.next">Regarder ensuite</h2></div>
+        <div class="rail-track">
+            <article class="media-card" th:each="item : ${recommendations}" th:attr="data-genres=${#strings.listJoin(item.genres, ',')}">
+                <a th:href="@{/watch/{id}(id=${item.id})}"><img th:src="${item.posterUrl}" th:alt="${item.title}"></a>
+                <div class="card-overlay"><strong th:text="${item.title}">Titre</strong><span th:text="${item.type}">Film</span></div>
+            </article>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title th:text="${title}">PrimeStream</title>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" th:href="@{/css/primestream.css}">
+</head>
+<body>
+
+<nav class="stream-nav" th:fragment="nav">
+    <button class="icon-pill menu-button" type="button" data-side-menu-toggle title="Menu">Menu</button>
+    <a class="stream-brand" th:href="@{/}"><span>P</span>PrimeStream</a>
+    <div class="nav-links">
+        <a th:href="@{/}" data-i18n="nav.home">Accueil</a>
+        <a th:href="@{/browse}" data-i18n="nav.browse">Films et series</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/profile}" data-i18n="nav.profile">Profil</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/subscription}" data-i18n="nav.subscription">Abonnement</a>
+        <a th:href="@{/support}" data-i18n="nav.support">Service client</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/stream}">Admin</a>
+        <a th:href="@{/store-home}">Boutique</a>
+    </div>
+    <div class="nav-right">
+        <select class="language-select" data-language-select title="Langue">
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+        </select>
+        <select class="mood-select" data-mood-select sec:authorize="isAuthenticated()" title="Changer de theme">
+            <option value="classic" data-genre="" th:selected="${currentProfile != null && currentProfile.moodMode == 'classic'}" data-i18n="mood.classic">Theme</option>
+            <option value="romance" data-genre="Romance" th:selected="${currentProfile != null && currentProfile.moodMode == 'romance'}" data-i18n="mood.romance">Romance</option>
+            <option value="action" data-genre="Action" th:selected="${currentProfile != null && currentProfile.moodMode == 'action'}" data-i18n="mood.action">Action</option>
+            <option value="family" data-genre="Famille" th:selected="${currentProfile != null && currentProfile.moodMode == 'family'}" data-i18n="mood.family">Famille</option>
+            <option value="science" data-genre="Science-fiction" th:selected="${currentProfile != null && currentProfile.moodMode == 'science'}" data-i18n="mood.science">Science-fiction</option>
+            <option value="afrique" data-genre="Afrique" th:selected="${currentProfile != null && currentProfile.moodMode == 'afrique'}" data-i18n="mood.africa">Afrique</option>
+        </select>
+        <a class="login-pill" sec:authorize="!isAuthenticated()" th:href="@{/login}" data-i18n="nav.login">Connexion</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+            <button class="login-pill" type="submit" data-i18n="nav.logout">Sortir</button>
+        </form>
+    </div>
+    <aside class="side-menu" data-side-menu>
+        <button class="side-close" type="button" data-side-menu-toggle data-i18n="common.close">Fermer</button>
+        <a th:href="@{/}" data-i18n="nav.home">Accueil PrimeStream</a>
+        <a th:href="@{/browse(type='Film')}" data-i18n="nav.movies">Films</a>
+        <a th:href="@{/browse(type='Serie')}" data-i18n="nav.series">Series</a>
+        <a th:href="@{/browse(type='Documentaire')}" data-i18n="nav.docs">Documentaires</a>
+        <a th:href="@{/browse(genre='Prime Originals')}">Prime Originals</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/profile}" data-i18n="nav.myspace">Mon espace</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/subscription}" data-i18n="nav.payment">Abonnement et paiement</a>
+        <a th:href="@{/support}" data-i18n="nav.help">Aide et service client</a>
+        <a th:href="@{/store-home}">Boutique</a>
+    </aside>
+    <div class="side-scrim" data-side-menu-toggle></div>
+</nav>
+
+<section th:fragment="succhero" class="succhero-widget" data-succhero-widget sec:authorize="isAuthenticated()">
+    <button class="succhero-launcher" type="button" data-succhero-toggle aria-label="SUCCHERO">S</button>
+    <div class="succhero-popover" role="dialog" aria-label="SUCCHERO chat">
+        <header class="succhero-header">
+            <div class="succhero-avatar">S</div>
+            <div>
+                <strong>SUCCHERO</strong>
+                <span data-i18n="succhero.subtitle">Assistant PrimeStream</span>
+            </div>
+            <button type="button" data-succhero-toggle aria-label="Fermer">x</button>
+        </header>
+        <div class="succhero-thread" data-succhero-thread>
+            <p class="from-assistant" th:if="${succheroMessages == null || succheroMessages.isEmpty()}" th:text="${succheroGreeting}">Bonjour, je suis SUCCHERO.</p>
+            <p th:each="message : ${succheroMessages}" th:class="${message.role.name() == 'USER' ? 'from-user' : 'from-assistant'}" th:text="${message.content}">Message</p>
+        </div>
+        <form class="succhero-chat" data-succhero-chat>
+            <input name="message" data-i18n-placeholder="succhero.placeholder" placeholder="Message SUCCHERO">
+            <button type="submit" aria-label="Envoyer" data-i18n="common.send">Envoyer</button>
+        </form>
+    </div>
+</section>
+
+<section th:fragment="succhero-toast" class="succhero-toast" data-succhero-toast sec:authorize="isAuthenticated()" th:if="${succheroAlerts != null && !succheroAlerts.isEmpty()}">
+    <div class="succhero-avatar">S</div>
+    <div>
+        <strong>SUCCHERO</strong>
+        <p th:text="${succheroGreeting}">Un film est disponible.</p>
+        <div>
+            <a th:href="@{/watch/{id}(id=${succheroAlerts[0].matchedMedia.id})}" data-i18n="common.watch">Voir</a>
+            <button type="button" th:data-watchlist="${succheroAlerts[0].matchedMedia.id}" data-i18n="common.watchLater">A regarder plus tard</button>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

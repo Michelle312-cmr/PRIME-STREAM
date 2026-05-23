@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Prime 2.0</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container section">
+    <div class="section-head">
+        <div>
+            <h1>Dashboard admin</h1>
+            <p class="muted">Utilisateurs, roles, produits, commandes et revenus simules.</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="btn secondary" type="submit">Deconnexion</button>
+        </form>
+    </div>
+    <div th:if="${success}" class="panel" th:text="${success}"></div>
+    <div th:if="${error}" class="panel" th:text="${error}"></div>
+    <section class="stats">
+        <div class="stat"><span class="muted">Utilisateurs</span><strong th:text="${totalUsers}">0</strong></div>
+        <div class="stat"><span class="muted">Produits</span><strong th:text="${products}">0</strong></div>
+        <div class="stat"><span class="muted">Commandes</span><strong th:text="${orders}">0</strong></div>
+    </section>
+    <section class="dashboard section">
+        <div class="panel">
+            <h2>Statistiques</h2>
+            <canvas id="adminChart" height="180"></canvas>
+        </div>
+        <div class="panel">
+            <h2>Notifications temps reel</h2>
+            <p class="muted">WebSocket configure sur <strong>/ws</strong>, canal <strong>/topic/notifications</strong>.</p>
+            <div class="badge prime">Promotions flash</div>
+            <div class="badge">Commandes</div>
+            <div class="badge">Chat client-vendeur</div>
+        </div>
+    </section>
+    <section class="panel">
+        <h2>Gestion des utilisateurs</h2>
+        <table>
+            <thead><tr><th>Utilisateur</th><th>Email</th><th>Roles</th><th>Actions</th></tr></thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.username}">user</td>
+                <td th:text="${user.email}">email</td>
+                <td><span class="badge" th:each="role : ${user.roles}" th:text="${role}">USER</span></td>
+                <td>
+                    <div class="hero-actions" th:if="${user.username != who}">
+                        <form th:action="@{/admin/users/{id}/toggle-admin(id=${user.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn secondary" type="submit">Admin</button>
+                        </form>
+                        <form th:action="@{/admin/users/{id}/toggle-seller(id=${user.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn secondary" type="submit">Vendeur</button>
+                        </form>
+                        <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+<script th:inline="javascript">
+    new Chart(document.getElementById('adminChart'), {
+        type: 'bar',
+        data: {labels: ['Utilisateurs', 'Admins', 'Produits', 'Commandes'], datasets: [{data: [ [[${totalUsers}]], [[${admins}]], [[${products}]], [[${orders}]] ], backgroundColor: ['#00a8e1', '#ffb703', '#118c4f', '#c43d4b']}]},
+        options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true}}}
+    });
+</script>
+<script th:src="@{/js/store.js}"></script>
+</body>
+</html>

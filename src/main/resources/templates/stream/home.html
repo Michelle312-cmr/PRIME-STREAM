@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{stream/partials :: head('PrimeStream')}"></head>
+<body class="stream-body" th:attr="data-mood=${currentProfile != null ? currentProfile.moodMode : 'classic'}">
+<nav th:replace="~{stream/partials :: nav}"></nav>
+
+<header class="stream-hero" th:if="${hero != null}" th:style="'background-image: linear-gradient(90deg, rgba(3,4,8,.94), rgba(3,4,8,.52), rgba(3,4,8,.96)), url(' + ${hero.bannerUrl} + ')'">
+    <div class="hero-copy">
+        <span class="kicker">PrimeStream Original</span>
+        <h1 th:text="${hero.title}">PrimeStream</h1>
+        <p th:text="${hero.description}">Streaming premium.</p>
+        <div class="meta-line">
+            <span th:text="${hero.releaseYear}">2026</span>
+            <span th:text="${hero.ageRating}">13+</span>
+            <span th:text="${hero.durationMinutes + ' min'}">110 min</span>
+            <span th:text="${'Star ' + hero.rating}">4.8</span>
+        </div>
+        <div class="hero-actions">
+            <a class="btn-stream primary" sec:authorize="isAuthenticated()" th:href="@{/watch/{id}(id=${hero.id})}" data-i18n="common.play">Lire</a>
+            <a class="btn-stream primary" sec:authorize="!isAuthenticated()" th:href="@{/login}" data-i18n="nav.login">Connexion</a>
+            <a class="btn-stream ghost" th:href="@{/browse}" data-i18n="common.explore">Explorer</a>
+        </div>
+    </div>
+</header>
+
+<main class="stream-main">
+    <section class="rail" sec:authorize="isAuthenticated()" th:if="${moodSelection != null && !moodSelection.isEmpty()}">
+        <div class="rail-head">
+            <h2 th:text="${currentProfile.moodMode == 'classic' ? 'Selection pour vous' : 'Mode ' + currentProfile.moodMode}">Selection pour vous</h2>
+            <a th:href="@{/browse}" data-i18n="home.changeTheme">Changer le theme</a>
+        </div>
+        <div class="rail-track">
+            <article class="media-card" th:each="media : ${moodSelection}" th:attr="data-genres=${#strings.listJoin(media.genres, ',')}">
+                <a th:href="@{/watch/{id}(id=${media.id})}"><img th:src="${media.posterUrl}" th:alt="${media.title}"></a>
+                <div class="card-overlay">
+                    <strong th:text="${media.title}">Titre</strong>
+                    <span th:text="${media.genres}">Genre</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head">
+            <h2 data-i18n="home.trending">Tendances maintenant</h2>
+            <a th:href="@{/browse}" data-i18n="common.seeAll">Tout voir</a>
+        </div>
+        <div class="rail-track">
+            <article class="media-card big" th:each="media : ${featured}" th:attr="data-genres=${#strings.listJoin(media.genres, ',')}">
+                <a th:href="@{/watch/{id}(id=${media.id})}" sec:authorize="isAuthenticated()"><img th:src="${media.posterUrl}" th:alt="${media.title}"></a>
+                <a th:href="@{/login}" sec:authorize="!isAuthenticated()"><img th:src="${media.posterUrl}" th:alt="${media.title}"></a>
+                <div class="card-overlay">
+                    <strong th:text="${media.title}">Titre</strong>
+                    <span th:text="${media.type + ' - ' + media.releaseYear + ' - ' + media.rating}">Film</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="home.top10">Top 10 dans votre pays</h2></div>
+        <div class="top-grid">
+            <article class="top-card" th:each="media, stat : ${topTen}" th:attr="data-genres=${#strings.listJoin(media.genres, ',')}">
+                <span class="rank" th:text="${stat.index + 1}">1</span>
+                <img th:src="${media.posterUrl}" th:alt="${media.title}">
+                <div>
+                    <h3 th:text="${media.title}">Titre</h3>
+                    <p th:text="${media.genres}">Genre</p>
+                    <a class="mini-link" th:href="@{/watch/{id}(id=${media.id})}" sec:authorize="isAuthenticated()" data-i18n="common.watch">Regarder</a>
+                    <a class="mini-link" th:href="@{/login}" sec:authorize="!isAuthenticated()" data-i18n="nav.login">Se connecter</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="rail">
+        <div class="rail-head"><h2 data-i18n="home.new">Nouveautes</h2></div>
+        <div class="rail-track">
+            <article class="media-card" th:each="media : ${newest}" th:attr="data-genres=${#strings.listJoin(media.genres, ',')}">
+                <a th:href="@{/watch/{id}(id=${media.id})}" sec:authorize="isAuthenticated()"><img th:src="${media.posterUrl}" th:alt="${media.title}"></a>
+                <a th:href="@{/login}" sec:authorize="!isAuthenticated()"><img th:src="${media.posterUrl}" th:alt="${media.title}"></a>
+                <div class="card-overlay">
+                    <strong th:text="${media.title}">Titre</strong>
+                    <span th:text="${media.premiumOnly ? 'Premium - 4K' : 'Inclus'}">Inclus</span>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{stream/partials :: succhero}"></div>
+<div th:replace="~{stream/partials :: succhero-toast}"></div>
+
+<script th:src="@{/js/primestream.js}"></script>
+</body>
+</html>

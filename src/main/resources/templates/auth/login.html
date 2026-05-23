@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" th:replace="~{auth/layout :: page(~{::section})}">
+<section>
+    <h2 class="form-title">Se connecter</h2>
+
+    <div th:if="${param.error}" class="error">Utilisateur ou mot de passe incorrect.</div>
+    <div th:if="${param.logout}" class="success">Deconnexion effectuee.</div>
+    <div th:if="${param.registered}" class="success">Compte cree. Vous pouvez vous connecter.</div>
+    <div th:if="${param.mail}" class="success">Email de confirmation envoye ou journalise en mode demo.</div>
+    <div th:if="${param.confirmed}" class="success">Email confirme. Bienvenue sur PrimeStream.</div>
+    <div th:if="${param.reset}" class="success">Mot de passe modifie. Connectez-vous.</div>
+
+    <form th:action="@{/login}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label for="username">Nom d'utilisateur</label>
+        <input id="username" name="username" type="text" placeholder="admin, user ou seller" autocomplete="username" required />
+
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" placeholder="Votre mot de passe" autocomplete="current-password" required />
+
+        <button class="btn" type="submit">Connexion</button>
+
+        <div class="links">
+            <a th:href="@{/forgot}">Mot de passe oublie</a>
+            <a th:href="@{/register}">Creer un compte</a>
+        </div>
+    </form>
+</section>
+</html>
